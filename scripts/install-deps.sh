@@ -5,7 +5,7 @@
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
-# 
+#
 # Contributors:
 #     Create-Net / FBK - initial API and implementation
 #-------------------------------------------------------------------------------
@@ -23,11 +23,14 @@ fi
 
 cd $CURRDIR
 
-sh ./scripts/install-dbus-java.sh $DEPS
-sh ./scripts/install-agile-interfaces.sh $DEPS
+#TODO: checkout agile-core and use that install script for deps
+
+# sh ./scripts/install-dbus-java.sh $DEPS
+# sh ./scripts/install-agile-interfaces.sh $DEPS
+
 sh ./scripts/install-tinyb.sh $DEPS
 
-# Enter into the project and compile 
+# Enter into the project and compile
 cd iot.agile.protocol.BLE
 
 mvn clean install -U
