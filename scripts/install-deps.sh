@@ -10,29 +10,48 @@
 #     Create-Net / FBK - initial API and implementation
 #-------------------------------------------------------------------------------
 
-apt install --no-install-recommends -y gettext git cmake
-# needed for docs only
-# sudo apt install --no-install-recommends -y texlive-latex-base texlive-latex-extra tex4ht
+set -e
 
-CURRDIR=`pwd`
-DEPS=${1:-$CURRDIR/deps}
+WD=`pwd`
+CURRDIR=${1:-$WD}
+BUILD=$CURRDIR/build
+ARM=$2
+mkdir -p $BUILD
 
-if [ -e "$DEPS" ]; then
-  rm $DEPS -rf
-fi
+git_fetch() {
+
+    cd $BUILD
+
+    REPO=$1
+    BNAME=`basename $REPO | sed 's/\.git//'`
+    LIBNAME=${2:-BNAME}
+    BRANCH=${3:-"master"}
+
+    if [ ! -e "./$LIBNAME" ]
+    then
+        echo "Clone $REPO to $LIBNAME"
+        git clone $REPO $LIBNAME
+    fi
+
+    echo "Fetching $LIBNAME"
+    cd $LIBNAME
+    git checkout $BRANCH
+    git pull
+    echo "OK"
+}
+
+LIB="jnr-unixsocket"
+git_fetch "https://github.com/jnr/jnr-unixsocket.git" "$LIB" # "master"
+mvn clean install -DskipTests=true
+
+LIB="dbus-java-mvn"
+git_fetch "https://github.com/muka/dbus-java-mvn.git" "$LIB" # "master"
+mvn clean install -DskipTests=true
+
+LIB="agile-api-spec"
+git_fetch "https://github.com/Agile-IoT/agile-api-spec.git" "$LIB" # "master"
+cd $BUILD/$LIB/agile-dbus-java-interface
+mvn clean install -DskipTests=true
 
 cd $CURRDIR
-
-#TODO: checkout agile-core and use that install script for deps
-
-# sh ./scripts/install-dbus-java.sh $DEPS
-# sh ./scripts/install-agile-interfaces.sh $DEPS
-
-sh ./scripts/install-tinyb.sh $DEPS
-
-# Enter into the project and compile
-cd iot.agile.protocol.BLE
-
-mvn clean install -U
-
-cd ..
+sh ./scripts/install-tinyb.sh $CURRDIR $ARM
