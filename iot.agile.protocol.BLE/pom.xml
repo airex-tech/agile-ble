@@ -60,7 +60,14 @@
             <version>3.0</version>
         </dependency>
     </dependencies>
-
+    
+    <repositories>
+        <repository>
+            <id>local-deps</id>
+            <url>${reposrc}</url>
+        </repository>
+    </repositories>
+    
     <build>
         <plugins>
             <plugin>
