@@ -28,12 +28,13 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eclipse.agail.Protocol;
 import org.eclipse.agail.ProtocolManager;
 import org.eclipse.agail.object.AbstractAgileObject;
 import org.eclipse.agail.object.DeviceOverview;
 import org.eclipse.agail.object.DeviceStatusType;
 import org.eclipse.agail.object.StatusType;
+import org.eclipse.agail.protocols.BLEProtocol;
+
 import tinyb.BluetoothDevice;
 import tinyb.BluetoothException;
 import tinyb.BluetoothGattCharacteristic;
@@ -48,7 +49,7 @@ import tinyb.BluetoothType;
  * @author dagi
  *
  */
-public class BLEProtocolImp extends AbstractAgileObject implements Protocol {
+public class BLEProtocolImp extends AbstractAgileObject implements BLEProtocol {
 
 	protected final Logger logger = LoggerFactory.getLogger(BLEProtocolImp.class);
 
@@ -120,7 +121,7 @@ public class BLEProtocolImp extends AbstractAgileObject implements Protocol {
 	}
 
 	public static void main(String[] args) throws DBusException {
-		Protocol bleProtocol = new BLEProtocolImp();
+		BLEProtocol bleProtocol = new BLEProtocolImp();
 	}
 
 	public BLEProtocolImp() throws DBusException {
@@ -576,7 +577,7 @@ public class BLEProtocolImp extends AbstractAgileObject implements Protocol {
 		public void run(byte[] record) {
 			lastRecord = record;
  			try {
-				Protocol.NewRecordSignal newRecordSignal = new Protocol.NewRecordSignal(AGILE_NEW_RECORD_SIGNAL_PATH,
+ 				BLEProtocol.NewRecordSignal newRecordSignal = new BLEProtocol.NewRecordSignal(AGILE_NEW_RECORD_SIGNAL_PATH,
 						lastRecord, address, profile);
 				logger.debug("Notifying {}", this);
 				logger.debug(record.toString());
@@ -642,8 +643,7 @@ public class BLEProtocolImp extends AbstractAgileObject implements Protocol {
 		return true;
 	}
 
-		// ======================= Listing the sensors ==============
-	@Override
+	// ======================= Listing the sensors ==============
 	public Map<String, List<String>> GetSensors(String deviceAddress) throws DBusException {
 		logger.debug("BLE Protocol =================== Get Sensors ======================== {}", deviceAddress);
 		if(deviceAddress.isEmpty()) {
