@@ -87,6 +87,9 @@ if [ $MODULE = 'all' ] || [ $MODULE = 'BLE' ]; then
     sleep 1;
   done
 
+  # Register BLE in ProtocolManager
+  qdbus org.eclipse.agail.ProtocolManager /org/eclipse/agail/ProtocolManager org.eclipse.agail.ProtocolManager.Add BLE
+
   java -cp deps/tinyb.jar:org.eclipse.agail.protocol.BLE/target/ble-1.0-jar-with-dependencies.jar -Djava.library.path=deps:deps/lib org.eclipse.agail.protocol.ble.BLEProtocolImp &
   echo "Started AGILE BLE protocol"
 fi
