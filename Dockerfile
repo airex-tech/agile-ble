@@ -11,8 +11,10 @@
 #     Create-Net / FBK - initial API and implementation
 #-------------------------------------------------------------------------------
 
-ARG BASEIMAGE_BUILD=agileiot/raspberry-pi3-zulujdk:8-jdk-maven
-ARG BASEIMAGE_DEPLOY=agileiot/raspberry-pi3-zulujdk:8-jre
+#ARG BASEIMAGE_BUILD=agileiot/raspberry-pi3-zulujdk:8-jdk-maven
+#ARG BASEIMAGE_DEPLOY=agileiot/raspberry-pi3-zulujdk:8-jre
+ARG      BASEIMAGE_BUILD=agileiot/intel-nuc-zulujdk:8-jdk-maven
+ARG      BASEIMAGE_DEPLOY=agileiot/intel-nuc-zulujdk:8-jre
 
 FROM $BASEIMAGE_BUILD
 
