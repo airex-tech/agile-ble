@@ -33,7 +33,11 @@ import org.eclipse.agail.object.AbstractAgileObject;
 import org.eclipse.agail.object.DeviceOverview;
 import org.eclipse.agail.object.DeviceStatusType;
 import org.eclipse.agail.object.StatusType;
+<<<<<<< HEAD
 import org.eclipse.agail.protocols.BLEProtocol;
+=======
+import org.eclipse.agail.protocols.config.ProtocolConfig;
+>>>>>>> origin/protocol-registration
 
 import tinyb.BluetoothDevice;
 import tinyb.BluetoothException;
@@ -82,6 +86,8 @@ public class BLEProtocolImp extends AbstractAgileObject implements BLEProtocol {
 	 * Protocol driver name
 	 */
 	private static final String DRIVER_NAME = "BLE";
+	
+	private List<ProtocolConfig> protocolConfigs = new ArrayList<ProtocolConfig>();
 
 	// Device status
 	public static final String CONNECTED = "CONNECTED";
@@ -676,5 +682,16 @@ public class BLEProtocolImp extends AbstractAgileObject implements BLEProtocol {
 		return servicesMap;
 	}
 
+	@Override
+	public void SetConfiguration(List<ProtocolConfig> configs) {
+		protocolConfigs = configs;
+		logger.debug("Setting the configurations.");		
+	}
+
+	@Override
+	public List<ProtocolConfig> GetConfiguration() {
+		logger.debug("Getting the configurations. {}", protocolConfigs);
+		return protocolConfigs;
+	}
 
 }
