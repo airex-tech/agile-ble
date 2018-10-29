@@ -11,10 +11,11 @@
 #     Create-Net / FBK - initial API and implementation
 #-------------------------------------------------------------------------------
 
-ARG BASEIMAGE_BUILD=agileiot/raspberry-pi3-zulujdk:8-jdk-maven
-ARG BASEIMAGE_DEPLOY=agileiot/raspberry-pi3-zulujdk:8-jre
+ARG BASEIMAGE_BUILD=resin/%%RESIN_MACHINE_NAME%%-debian:stretch
+FROM $BASEIMAGE_BUILD as builder
 
-FROM $BASEIMAGE_BUILD
+# Try to run stuff that is copied down for ARM on my PC; doesn't work for build
+# COPY ./qemu-arm-static /usr/bin/qemu-arm-static
 
 # Add packages
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -37,7 +38,16 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     gcc-4.9 \
     g++-4.9 \
     qdbus \
+    wget \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Java stuff
+RUN sudo apt-get update \
+    && sudo apt-get install oracle-java8-jdk \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME to whatever the install dir is
+ENV JAVA_HOME /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
 
 # resin-sync will always sync to /usr/src/app, so code needs to be here.
 WORKDIR /usr/src/app
@@ -49,14 +59,11 @@ COPY agile-dbus-java-interface agile-dbus-java-interface
 RUN CC=clang CXX=clang++ CMAKE_C_COMPILER=clang CMAKE_CXX_COMPILER=clang++ \
 scripts/install-agile-interfaces.sh $APATH/deps
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt-get update && apt-get install --no-install-recommends -y apt-transport-https \
     libbluetooth-dev \
     libudev-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    libglib2.0-0=2.42.1-1+b1 \
-    libglib2.0-dev=2.42.1-1+b1 \
+    libglib2.0-0 \
+    libglib2.0-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig CC=clang CXX=clang++ CMAKE_C_COMPILER=clang CMAKE_CXX_COMPILER=clang++ \
@@ -72,25 +79,30 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libxrender1 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# isntall bluez
-RUN echo "deb http://deb.debian.org/debian stable main" >>/etc/apt/sources.list \
-    && apt-get update && apt-get install --no-install-recommends -y \
-    bluez=5.43-2+deb9u1 \
+# install bluez
+RUN apt-get update && apt-get install --no-install-recommends --force-yes \
+    bluez \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # copy directories into WORKDIR
 COPY org.eclipse.agail.protocol.BLE org.eclipse.agail.protocol.BLE
 
-RUN mvn package -f ./org.eclipse.agail.protocol.BLE/pom.xml 
+RUN mvn package -f ./org.eclipse.agail.protocol.BLE/pom.xml
 
-FROM $BASEIMAGE_DEPLOY
+FROM $BASEIMAGE_BUILD
 WORKDIR /usr/src/app
 ENV APATH /usr/src/app
 
+# Install Java stuff
+RUN sudo apt-get update \
+    && sudo apt-get install default-jre \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME /usr/lib/jvm/default-java
+
 # install services
-RUN echo "deb http://deb.debian.org/debian stable main" >>/etc/apt/sources.list \
-    && apt-get update && apt-get install --no-install-recommends -y \
-    bluez=5.43-2+deb9u1 \
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    bluez \
     dbus \
     qdbus \
     libxrender1 \
@@ -98,9 +110,9 @@ RUN echo "deb http://deb.debian.org/debian stable main" >>/etc/apt/sources.list 
     libxtst6 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=0 $APATH/scripts scripts
-COPY --from=0 $APATH/org.eclipse.agail.protocol.BLE/target/ble-1.0-jar-with-dependencies.jar org.eclipse.agail.protocol.BLE/target/ble-1.0-jar-with-dependencies.jar
-COPY --from=0 $APATH/deps deps
+COPY --from=builder $APATH/scripts scripts
+COPY --from=builder $APATH/org.eclipse.agail.protocol.BLE/target/ble-1.0-jar-with-dependencies.jar org.eclipse.agail.protocol.BLE/target/ble-1.0-jar-with-dependencies.jar
+COPY --from=builder $APATH/deps deps
 
 # workaround for external startup command. To be removed.
 RUN mkdir -p /usr/local/libexec/bluetooth/ && ln -s /usr/sbin/bluetoothd /usr/local/libexec/bluetooth/bluetoothd
