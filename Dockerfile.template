@@ -11,7 +11,7 @@
 #     Create-Net / FBK - initial API and implementation
 #-------------------------------------------------------------------------------
 
-ARG BASEIMAGE_BUILD=resin/%%RESIN_MACHINE_NAME%%-debian:stretch
+ARG BASEIMAGE_BUILD=resin/%%BALENA_MACHINE_NAME%%-debian:stretch
 FROM $BASEIMAGE_BUILD as builder
 
 # Try to run stuff that is copied down for ARM on my PC; doesn't work for build
