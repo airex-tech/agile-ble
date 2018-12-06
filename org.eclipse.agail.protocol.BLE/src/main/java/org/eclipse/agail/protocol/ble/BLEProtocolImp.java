@@ -284,8 +284,10 @@ public class BLEProtocolImp extends AbstractAgileObject implements Protocol {
 		}
 
 		logger.info("Started discovery of BLE devices");
+		logger.debug("Testing DEBUG message");
 
 		bleManager.startDiscovery();
+		logger.debug("Got past start discovery");
 
 		/* TODO: would be better reactive: lister to bluez/TinyB signals */
 		Runnable task = () -> {
