@@ -101,7 +101,8 @@ RUN sudo apt-get update \
 ENV JAVA_HOME /usr/lib/jvm/default-java
 
 # install services
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN echo "deb http://deb.debian.org/debian unstable main" >>/etc/apt/sources.list \
+    && apt-get update && apt-get install --no-install-recommends -y \
     bluez/unstable \
     dbus \
     qdbus \
