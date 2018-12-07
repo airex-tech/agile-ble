@@ -102,7 +102,7 @@ ENV JAVA_HOME /usr/lib/jvm/default-java
 
 # install services
 RUN apt-get update && apt-get install --no-install-recommends -y \
-    bluez \
+    bluez/unstable \
     dbus \
     qdbus \
     libxrender1 \
